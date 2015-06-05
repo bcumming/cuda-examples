@@ -14,7 +14,6 @@
 __global__
 void newton(int n, double *x) {
     auto tid = threadIdx.x + blockDim.x * blockIdx.x;
-    auto grid_step = blockDim.x * gridDim.x;
 
     auto f  = [] (double x) {
         return exp(cos(x))-2;
@@ -23,13 +22,12 @@ void newton(int n, double *x) {
         return -sin(x) * exp(cos(x));
     };
 
-    while(tid<n) {
+    if(tid<n) {
         auto x0 = x[tid];
         for(int i=0; i<5; ++i) {
             x0 -= f(x0)/fp(x0);
         }
         x[tid] = x0;
-        tid += grid_step;
     }
 }
 
@@ -56,7 +54,6 @@ int main(int argc, char** argv) {
     // precompute kernel launch configuration
     auto block_dim = 128ul;
     auto grid_dim = chunk_size/block_dim + (chunk_size%block_dim ? 1 : 0);
-    grid_dim = std::min(1024ul, grid_dim);
 
     CudaStream D2H_stream(true);
     CudaStream H2D_stream(true);

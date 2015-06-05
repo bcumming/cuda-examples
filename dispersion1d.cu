@@ -69,7 +69,6 @@ int main(int argc, char** argv) {
     // find the launch grid configuration
     auto block_dim = 128ul;
     auto grid_dim = N/block_dim + (N%block_dim ? 1 : 0);
-    grid_dim = std::min(1024ul, grid_dim);
 
     std::cout << "threads per block " << block_dim << ", in " << grid_dim << " blocks" << std::endl;
 

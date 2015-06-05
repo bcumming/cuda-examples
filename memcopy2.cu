@@ -12,11 +12,9 @@
 __global__
 void axpy(int n, double alpha, const double *x, double* y) {
     int tid = threadIdx.x + blockDim.x * blockIdx.x;
-    int grid_step = blockDim.x * gridDim.x;
 
-    while(tid<n) {
+    if(tid<n) {
         y[tid] += alpha*x[tid];
-        tid += grid_step;
     }
 }
 
@@ -45,7 +43,6 @@ int main(int argc, char** argv) {
     // precompute kernel launch configuration
     auto block_dim = 128ul;
     auto grid_dim = chunk_size/block_dim + (chunk_size%block_dim ? 1 : 0);
-    grid_dim = std::min(1024ul, grid_dim);
 
     CudaStream D2H_stream(true);
     CudaStream H2D_stream(true);

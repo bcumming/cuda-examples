@@ -31,11 +31,9 @@ namespace kernels {
     __global__
     void fill(T *v, T value, int n) {
         int tid  = threadIdx.x + blockDim.x*blockIdx.x;
-        int grid_step = blockDim.x * gridDim.x;
 
-        while(tid<n) {
+        if(tid<n) {
             v[tid] = value;
-            tid += grid_step;
         }
     }
 }
@@ -56,7 +54,6 @@ template <typename T>
 void fill_gpu(T *v, T value, int n) {
     auto block_dim = 128ul;
     auto grid_dim = n/block_dim + (n%block_dim ? 1 : 0);
-    grid_dim = std::min(1024ul, grid_dim);
 
     kernels::fill<T><<<grid_dim, block_dim>>>(v, value, n);
 }

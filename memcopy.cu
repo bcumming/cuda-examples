@@ -12,11 +12,9 @@
 __global__
 void axpy(int n, double alpha, const double *x, double* y) {
     int tid = threadIdx.x + blockDim.x * blockIdx.x;
-    int grid_step = blockDim.x * gridDim.x;
 
-    while(tid<n) {
+    if(tid<n) {
         y[tid] += alpha*x[tid];
-        tid += grid_step;
     }
 }
 
@@ -53,7 +51,6 @@ int main(int argc, char** argv) {
     // y += 2 * x
     auto block_dim = 128ul;
     auto grid_dim = N/block_dim + (N%block_dim ? 1 : 0);
-    grid_dim = std::min(1024ul, grid_dim);
 
     axpy<<<grid_dim, block_dim>>> (N, 2.0, x_device, y_device);
 
