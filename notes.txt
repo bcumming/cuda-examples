@@ -1,0 +1,31 @@
+profiling
+---------
+
+# to run the profiler:
+aprun -b nvprof memcopy 20
+
+# to get print out of gpu trace
+aprun -b nvprof --print-gpu-trace memcopy 20
+
+# to save trace for visual profiler
+aprun -b nvprof --output-profile filename memcopy 20
+
+----------------
+    memcopy2
+----------------
+Uses streaming to improve performance of axpy kernel example. The only real speedup improvement is the ability to overlap the D2H and H2D transfers, because the compute kernel overheads are small relative to the host-device transfer overheads.
+- compare with and without pinned memory (hint : the pinned memory is faster for larger arrays)
+
+----------------
+    memcopy3
+----------------
+
+Implements newton iteration to solve a local nonlinear problem.
+It takes longer to perform the iteration than it does to perform the data copies, so everybody wins.
+
+I use 5 newton iterations, which is just enough for the kernel to take longer than transfer.
+
+NOTE:
+- the H2D and D2H transfers overlap very well, obtaining a greater overall bandwidth than having transfer in just one direction
+- no
+
