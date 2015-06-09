@@ -4,7 +4,7 @@ FLAGS+=-O3
 
 LINK=-lcublas -lcuda
 
-all : axpy_cublas axpy_kernel memcopy memcopy2 memcopy3 blur diffusion2d diffusion2d_mpi dispersion1d
+all : axpy_cublas axpy_kernel memcopy memcopy2 memcopy3 blur diffusion2d diffusion2d_mpi blur_twice blur_twice.omp dot
 
 axpy_cublas : axpy_cublas.cu util.h
 	nvcc $(FLAGS) axpy_cublas.cu -o axpy_cublas $(LINK)
@@ -37,8 +37,14 @@ diffusion_kernels.o : diffusion_kernels.cu
 diffusion2d_mpi : diffusion2d_mpi.cpp util.h diffusion_kernels.o
 	CC -std=c++11 -O3 diffusion2d_mpi.cpp diffusion_kernels.o -o diffusion2d_mpi
 
-dispersion1d : dispersion1d.cu util.h
-	nvcc $(FLAGS) dispersion1d.cu -o dispersion1d $(LINK)
+blur_twice : blur_twice.cu util.h
+	nvcc $(FLAGS) blur_twice.cu -o blur_twice $(LINK)
+
+blur_twice.omp : blur_twice.cpp util.h
+	CC -std=c++11 -O3 -fopenmp blur_twice.cpp -o blur_twice.omp $(LINK)
+
+dot : dot.cu util.h
+	nvcc $(FLAGS) dot.cu -o dot $(LINK)
 
 test : axpy_cublas axpy_kernel
 	aprun axpy_cublas 20
@@ -54,4 +60,4 @@ clean :
 	rm -f blur
 	rm -f diffusion2d
 	rm -f diffusion2d_mpi
-	rm -f dispersion1d
+	rm -f blur_twice

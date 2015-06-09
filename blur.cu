@@ -10,9 +10,9 @@ __global__
 void blur_shared(const double *in, double* out, int n) {
     extern __shared__ double buffer[];
 
-    int block_start = blockDim.x * blockIdx.x;
-    int li = threadIdx.x + 1;
-    int gi = li + block_start;
+    auto block_start = blockDim.x * blockIdx.x;
+    auto li = threadIdx.x + 1;
+    auto gi = li + block_start;
 
     if(gi<n-1) {
         // load shared memory
@@ -22,7 +22,9 @@ void blur_shared(const double *in, double* out, int n) {
             buffer[blockDim.x+1] = in[block_start+blockDim.x+1];
         }
 
-        out[gi] = 0.25*(buffer[li-1] -2.0*buffer[li] + buffer[li+1]);
+        __syncthreads();
+
+        out[gi] = 0.25*(buffer[li-1] + 2.0*buffer[li] + buffer[li+1]);
     }
 }
 
@@ -30,7 +32,7 @@ __global__
 void blur_shared_block(const double *in, double* out, int n) {
     extern __shared__ double buffer[];
 
-    int i = threadIdx.x + 1;
+    auto i = threadIdx.x + 1;
 
     if(i<n-1) {
         // load shared memory
@@ -42,16 +44,16 @@ void blur_shared_block(const double *in, double* out, int n) {
 
         __syncthreads();
 
-        out[i] = 0.25*(buffer[i-1] -2.0*buffer[i] + buffer[i+1]);
+        out[i] = 0.25*(buffer[i-1] + 2.0*buffer[i] + buffer[i+1]);
     }
 }
 
 __global__
 void blur(const double *in, double* out, int n) {
-    int i = threadIdx.x + blockDim.x * blockIdx.x + 1;
+    auto i = threadIdx.x + blockDim.x * blockIdx.x + 1;
 
     if(i<n-1) {
-        out[i] = 0.25*(in[i-1] + 2*in[i] + in[i+1]);
+        out[i] = 0.25*(in[i-1] + 2.0*in[i] + in[i+1]);
     }
 }
 
@@ -78,6 +80,7 @@ int main(int argc, char** argv) {
 
     // copy initial conditions to device
     copy_to_device<double>(x_host, x0, n+2);
+    copy_to_device<double>(x_host, x1, n+2);
 
     // find the launch grid configuration
     auto block_dim = 512ul;
@@ -101,6 +104,9 @@ int main(int argc, char** argv) {
     auto time = stop_event.time_since(start_event);
     std::cout << "==== that took " << time << " seconds"
               << " (" << time/nsteps << "s/step)" << std::endl;
+
+
+    for(auto i=0; i<20; ++i) std::cout << x_host[i] << " "; std::cout << std::endl;
 
     return 0;
 }

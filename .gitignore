@@ -5,6 +5,8 @@
 *.cubin
 *.fatbin
 
+test.cpp
+
 axpy_cublas
 axpy_kernel
 axpy_omp
@@ -14,7 +16,9 @@ memcopy3
 blur
 diffusion2d
 diffusion2d_mpi
-dispersion1d
+blur_twice
+blur_twice.omp
+dot
 
 a.out
 
@@ -23,3 +27,5 @@ a.out
 *.swn
 *.swo
 *.swq
+
+profile

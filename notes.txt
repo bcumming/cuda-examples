@@ -1,6 +1,8 @@
 profiling
 ---------
 
+export PMI_NO_FORK=1
+
 # to run the profiler:
 aprun -b nvprof memcopy 20
 
@@ -8,7 +10,7 @@ aprun -b nvprof memcopy 20
 aprun -b nvprof --print-gpu-trace memcopy 20
 
 # to save trace for visual profiler
-aprun -b nvprof --output-profile filename memcopy 20
+aprun -b nvprof -o filename memcopy 20
 
 ----------------
     memcopy2
