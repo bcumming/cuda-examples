@@ -94,7 +94,8 @@ int main(int argc, char** argv) {
     // initialize MPI
     int mpi_rank, mpi_size;
 
-    //MPI_Init(&argc, &argv);
+    // intialize MPI with MPI_THREAD_MULTIPLE because the boundary threads
+    // call MPI asynchroously
     int level;
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &level);
     switch(level) {
@@ -103,7 +104,7 @@ int main(int argc, char** argv) {
         case MPI_THREAD_SERIALIZED : std::cout << "thread serialized" << std::endl; break;
         case MPI_THREAD_MULTIPLE   : std::cout << "thread multiple" << std::endl; break;
     }
-    assert(level >= MPI_THREAD_SERIALIZED);
+    assert(level == MPI_THREAD_MULTIPLE);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
@@ -152,7 +153,7 @@ int main(int argc, char** argv) {
 
     auto start_event = null_stream.get_event();
 
-    // only turn on CUDA profiler for the first rank
+    // turn on the cuda profiler here
     cuda_check_status( cudaProfilerStart() );
 
     // time stepping loop
@@ -204,6 +205,15 @@ int main(int argc, char** argv) {
               << std::endl;
 
     MPI_Finalize();
+
+    cudaFree(x0);
+    cudaFree(x1);
+    cudaFreeHost(x_host);
+
+    cudaFreeHost(send_north);
+    cudaFreeHost(send_south);
+    cudaFreeHost(send_east);
+    cudaFreeHost(send_west);
 
     return 0;
 }
