@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     CudaStream H2D_stream(true);
     CudaStream kernel_stream(true);
 
-    auto start_event = D2H_stream.get_event();
+    auto start_event = D2H_stream.enqueue_event();
     for(int i=0; i<num_chunks; ++i) {
         auto offset = i*chunk_size;
 
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
         copy_to_device_async<double>(yh+offset, yd+offset, chunk_size, H2D_stream.stream());
 
         // force the kernel stream to wait for the memcpy
-        auto H2D_event = H2D_stream.get_event();
+        auto H2D_event = H2D_stream.enqueue_event();
         kernel_stream.wait_on_event(H2D_event);
 
         // y += 2 * x
@@ -65,11 +65,11 @@ int main(int argc, char** argv) {
         cuda_check_last_kernel("axpy kernel");
 
         // copy chunk of result back to host
-        auto kernel_event = kernel_stream.get_event();
+        auto kernel_event = kernel_stream.enqueue_event();
         D2H_stream.wait_on_event(kernel_event);
         copy_to_host_async<double>(yd+offset, y+offset, chunk_size, D2H_stream.stream());
     }
-    auto end_event = D2H_stream.get_event();
+    auto end_event = D2H_stream.enqueue_event();
     end_event.wait();
 
     auto time_total = end_event.time_since(start_event);

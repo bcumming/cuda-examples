@@ -73,12 +73,12 @@ int main(int argc, char** argv) {
               << std::endl;
 
     CudaStream stream;
-    auto start_event = stream.get_event();
+    auto start_event = stream.enqueue_event();
     for(auto step=0; step<nsteps; ++step) {
         blur_twice<<<grid_dim, block_dim, shared_size>>>(x0, x1, n);
         std::swap(x0, x1);
     }
-    auto stop_event = stream.get_event();
+    auto stop_event = stream.enqueue_event();
 
     // copy result back to host
     copy_to_host<double>(x0, x_host, n);

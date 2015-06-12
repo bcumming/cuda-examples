@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 
     CudaStream stream;
     CudaStream copy_stream(true);
-    auto start_event = stream.get_event();
+    auto start_event = stream.enqueue_event();
 
     // time stepping loop
     for(auto step=0; step<nsteps; ++step) {
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 
         std::swap(x0, x1);
     }
-    auto stop_event = stream.get_event();
+    auto stop_event = stream.enqueue_event();
     stop_event.wait();
 
     copy_to_host<double>(x0, x_host, buffer_size);

@@ -43,10 +43,10 @@ int main(int argc, char** argv) {
 
     // copy to device
         CudaStream stream; // default stream
-        auto start_event = stream.get_event();
+        auto start_event = stream.enqueue_event();
     copy_to_device_async<double>(y_host, y_device, N, stream.stream());
     copy_to_device_async<double>(x_host, x_device, N, stream.stream());
-        auto H2D_event = stream.get_event();
+        auto H2D_event = stream.enqueue_event();
 
     // y += 2 * x
     auto block_dim = 128ul;
@@ -55,11 +55,11 @@ int main(int argc, char** argv) {
     axpy<<<grid_dim, block_dim>>> (N, 2.0, x_device, y_device);
 
         cuda_check_last_kernel("axpy kernel");
-        auto kernel_event = stream.get_event();
+        auto kernel_event = stream.enqueue_event();
 
     // copy result back to host
     copy_to_host_async<double>(y_device, y, N, stream.stream());
-        auto end_event = stream.get_event();
+        auto end_event = stream.enqueue_event();
         end_event.wait();
 
     auto time_total = end_event.time_since(start_event);

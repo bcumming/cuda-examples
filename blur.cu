@@ -89,13 +89,13 @@ int main(int argc, char** argv) {
     blur<<<grid_dim, block_dim>>>(x0, x1, n);
 
     CudaStream stream;
-    auto start_event = stream.get_event();
+    auto start_event = stream.enqueue_event();
     for(auto step=0; step<nsteps; ++step) {
         //blur<<<grid_dim, block_dim>>>(x0, x1, n);
         blur_shared<<<grid_dim, block_dim, (block_dim+2)*sizeof(double)>>>(x0, x1, n);
         std::swap(x0, x1);
     }
-    auto stop_event = stream.get_event();
+    auto stop_event = stream.enqueue_event();
 
     // copy result back to host
     copy_to_host<double>(x0, x_host, n+2);

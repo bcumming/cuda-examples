@@ -29,7 +29,7 @@ class CudaStream {
 
     // insert event into stream
     // returns immediately
-    CudaEvent get_event() {
+    CudaEvent enqueue_event() {
         CudaEvent e;
 
         auto status = cudaEventRecord(e.event(), stream_);

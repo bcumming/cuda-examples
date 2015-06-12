@@ -48,7 +48,7 @@ bool exchange_boundary( double *x0,
 
         // copy from device to host
         copy_to_host_async<double>(x0, send_buff, nx, s.stream());
-        auto sende = s.get_event();
+        auto sende = s.enqueue_event();
 
         // wait buffer to finish copying from device before sending
         sende.wait();
@@ -74,7 +74,7 @@ bool exchange_boundary( double *x0,
     }
 
     // the thread waits until the kernel has completed
-    s.get_event().wait();
+    s.enqueue_event().wait();
 
     return true;
 }
@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
     CudaStream interior_stream(true);
     CudaStream null_stream(false);
 
-    auto start_event = null_stream.get_event();
+    auto start_event = null_stream.enqueue_event();
 
     // turn on the cuda profiler here
     cuda_check_status( cudaProfilerStart() );
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
         }
 
         diffusion_interior(x0, x1, nx, ny, dt, interior_stream.stream());
-        interior_stream.get_event().wait();
+        interior_stream.enqueue_event().wait();
 
         for(auto &r : results) {
             r.get();
@@ -191,7 +191,7 @@ int main(int argc, char** argv) {
 
         std::swap(x0, x1);
     }
-    auto stop_event = interior_stream.get_event();
+    auto stop_event = interior_stream.enqueue_event();
     stop_event.wait();
 
     copy_to_host<double>(x0, x_host, buffer_size);
