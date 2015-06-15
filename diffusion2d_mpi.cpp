@@ -212,8 +212,6 @@ int main(int argc, char** argv) {
 
     cudaFreeHost(send_north);
     cudaFreeHost(send_south);
-    cudaFreeHost(send_east);
-    cudaFreeHost(send_west);
 
     return 0;
 }
